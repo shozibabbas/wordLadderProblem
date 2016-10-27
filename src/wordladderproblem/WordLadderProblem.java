@@ -38,17 +38,21 @@ public static void main(String[] args) {
         Logger.getLogger(WordLadderProblem.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    String startWord = "FOOL";
-    String endWord = "SAGE";
+    String startWord = "COLD";
+    String endWord = "WARM";
 
     Set<String> dictionary = buildDictionary(wordDictionary, startWord.length());
     Ladder result = buildLadder(startWord, endWord, dictionary);
     
-    ArrayList<Ladder> all = executioner(wordDictionary);    
+    //ArrayList<Ladder> all = executioner(wordDictionary);    
 
-    for(int i = 0; i < all.size(); i++) {
-        System.out.println(all.get(i).getPath());
-    }
+    //for(int i = 0; i < all.size(); i++) {
+    //    System.out.println(all.get(i).getPath());
+    //}
+    
+    //System.out.println(minChains(wordDictionary));
+    //System.out.println(maxChains(wordDictionary));
+    //System.out.println(noChains(wordDictionary));
     
     if(result!=null){
      System.out.println("Length is "+result.getLength() + " and path is :"+ result.getPath());
@@ -94,6 +98,9 @@ public static ArrayList<ArrayList<Ladder>> minChains(JSONObject dict) {
             if(curWord.length() != obsWord.length())
                 continue;
             Ladder bl = buildLadder(curWord, obsWord, customDict);
+            if(bl == null)
+                continue;
+            else
             if(bl.getLength() < minLength) {
                 temp2.clear();
                 temp2.add(bl);
@@ -133,6 +140,33 @@ public static ArrayList<Ladder> maxChains(JSONObject dict) {
             if(bl.getLength() == maxLength) {
                 temp.add(bl);
             }  
+        }
+    }  
+    
+    return temp;    
+}
+
+public static ArrayList<String> noChains(JSONObject dict) {
+    ArrayList<String> temp = new ArrayList<String>();
+    List<String> keys1 = new ArrayList(dict.keySet());
+
+    for(int a = 0; a < keys1.size(); a++) {
+        String curWord = keys1.get(a);
+        int numChains = 0;
+        Set<String> customDict = buildDictionary(dict, curWord.length());
+        List<String> keys2 = new ArrayList(customDict);
+        for(int i = 0; i < keys2.size(); i++) {
+            String obsWord = keys2.get(i);
+            if(curWord.length() != obsWord.length())
+                continue;
+            Ladder bl = buildLadder(curWord, obsWord, customDict);
+            if(bl != null) {
+                numChains++;
+                continue;
+            }
+        }
+        if(numChains == 0) {
+            temp.add(curWord);
         }
     }  
     
