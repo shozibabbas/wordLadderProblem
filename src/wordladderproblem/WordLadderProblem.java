@@ -7,10 +7,12 @@ package wordladderproblem;
 
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;  
 import java.util.logging.Level;
@@ -24,6 +26,8 @@ import org.json.simple.parser.JSONParser;
  * @author Sayyed Shozib Abbas
  */
 public class WordLadderProblem {
+    
+    static int EXECUTION_CAP = 20000;
 
 public static void main(String[] args) {
     JSONParser parser = new JSONParser();
@@ -47,7 +51,7 @@ public static void main(String[] args) {
     //ArrayList<Ladder> all = executioner(wordDictionary);    
 
     //for(int i = 0; i < all.size(); i++) {
-    //    System.out.println(all.get(i).getPath());
+    //    System.out.println(all.get(i).getLastWord());
     //}
     
     //System.out.println(minChains(wordDictionary));
@@ -63,6 +67,7 @@ public static void main(String[] args) {
  }
 
 public static ArrayList<Ladder> executioner(JSONObject dict) {
+    int EXECUTION_COUNTER = 0;
     ArrayList<Ladder> temp = new ArrayList<Ladder>();
     List<String> keys1 = new ArrayList(dict.keySet());
 
@@ -72,12 +77,18 @@ public static ArrayList<Ladder> executioner(JSONObject dict) {
         List<String> keys2 = new ArrayList(customDict);
         for(int i = 0; i < keys2.size(); i++) {
             String obsWord = keys2.get(i);
-
+            if(EXECUTION_COUNTER++ >= EXECUTION_CAP)
+                break;
             if(curWord.length() != obsWord.length())
                 continue;
-            Ladder bl = buildLadder(curWord, obsWord, customDict);
-            temp.add(bl);
+            Ladder bl = buildLadder(curWord, obsWord, customDict);            
+            if(bl != null) {
+                temp.add(bl);                
+            }
+
         }
+        if(EXECUTION_COUNTER++ >= EXECUTION_CAP)
+            break;
     }  
     
     return temp;
@@ -104,10 +115,12 @@ public static ArrayList<ArrayList<Ladder>> minChains(JSONObject dict) {
             if(bl.getLength() < minLength) {
                 temp2.clear();
                 temp2.add(bl);
+                System.out.println(bl.getPath());
                 minLength = bl.getLength();
             }
             else
             if(bl.getLength() == minLength) {
+                System.out.println(bl.getPath());
                 temp2.add(bl);
             }  
         }
@@ -171,6 +184,35 @@ public static ArrayList<String> noChains(JSONObject dict) {
     }  
     
     return temp;    
+}
+
+public static Map<Integer, Integer> frequencies(JSONObject dict) {
+    Map <Integer, Integer> hm = new HashMap<Integer, Integer>();
+    List<String> keys1 = new ArrayList(dict.keySet());
+
+    for(int a = 0; a < keys1.size(); a++) {
+        String curWord = keys1.get(a);
+        int numChains = 0;
+        Set<String> customDict = buildDictionary(dict, curWord.length());
+        List<String> keys2 = new ArrayList(customDict);
+        for(int i = 0; i < keys2.size(); i++) {
+            String obsWord = keys2.get(i);
+            if(curWord.length() != obsWord.length())
+                continue;
+            Ladder bl = buildLadder(curWord, obsWord, customDict);
+            if(bl != null) {
+                if(hm.containsKey(bl.getLength())) {
+                    int t = hm.get(i).intValue() + 1;
+                    hm.put(i, t);
+                }
+                else
+                    hm.put(i, 0);
+            }
+        }
+
+    }  
+    
+    return hm;     
 }
 
 public static Set<String> buildDictionary(JSONObject dict, int wordLength) {
